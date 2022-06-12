@@ -15,27 +15,26 @@ func Unpack(str string) (string, error) {
 	var countRepeat int
 	var nextValue rune
 	var slash bool
+	var lastElem bool
 
 	for key, value := range runesArray {
+		lastElem = key == len(runesArray)-1
 
-		if unicode.IsDigit(value) && key == 0 {
+		if (!unicode.IsDigit(value) && value != '\\' && slash) ||
+			(unicode.IsDigit(value) && key == 0) {
 			return "", ErrInvalidString
 		}
 
-		if value == '\\' && slash == false {
+		if value == '\\' && !slash {
 			slash = true
 			continue
 		}
 
-		if unicode.IsDigit(value) && key == len(runesArray)-1 && !slash {
+		if unicode.IsDigit(value) && lastElem && !slash {
 			continue
 		}
 
-		if ((!unicode.IsDigit(value)) && value != '\\') && slash {
-			return "", ErrInvalidString
-		}
-
-		if !(key == len(runesArray)-1) {
+		if !lastElem {
 			nextValue = runesArray[key+1]
 
 			if unicode.IsDigit(value) && unicode.IsDigit(nextValue) && !slash {
@@ -49,11 +48,6 @@ func Unpack(str string) (string, error) {
 			slash = false
 			if unicode.IsDigit(nextValue) {
 				countRepeat, _ = strconv.Atoi(string(nextValue))
-
-				if countRepeat == 0 {
-					continue
-				}
-
 				stringBuilder.WriteString(strings.Repeat(string(value), countRepeat))
 				continue
 			}
