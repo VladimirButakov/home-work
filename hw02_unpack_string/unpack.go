@@ -27,22 +27,22 @@ func Unpack(str string) (string, error) {
 			continue
 		}
 
-		if unicode.IsDigit(value) && (key == len(runesArray)-1) && slash == false {
+		if unicode.IsDigit(value) && key == len(runesArray)-1 && !slash {
 			continue
 		}
 
-		if ((!unicode.IsDigit(value)) && value != '\\') && slash == true {
+		if ((!unicode.IsDigit(value)) && value != '\\') && slash {
 			return "", ErrInvalidString
 		}
 
 		if !(key == len(runesArray)-1) {
 			nextValue = runesArray[key+1]
 
-			if unicode.IsDigit(value) && unicode.IsDigit(nextValue) && slash == false {
+			if unicode.IsDigit(value) && unicode.IsDigit(nextValue) && !slash {
 				return "", ErrInvalidString
 			}
 
-			if unicode.IsDigit(value) && slash == false {
+			if unicode.IsDigit(value) && !slash {
 				continue
 			}
 
