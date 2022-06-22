@@ -15,7 +15,6 @@ func Top10(str string) []string {
 	sortMap := make(map[string]int)
 	result := []string{}
 	sortSlice := []element{}
-	count := 0
 
 	for _, value := range arrayStrings {
 		sortMap[value]++
@@ -34,13 +33,12 @@ func Top10(str string) []string {
 		return iWord.Value > jWord.Value
 	})
 
-	for _, value := range sortSlice {
-		if count == 10 {
+	for key, value := range sortSlice {
+		if key == 10 {
 			break
 		}
 
 		result = append(result, value.Key)
-		count++
 	}
 
 	return result
