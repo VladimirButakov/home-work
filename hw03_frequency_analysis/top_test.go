@@ -78,16 +78,16 @@ func TestTop10(t *testing.T) {
 
 	t.Run("positive test", func(t *testing.T) {
 		expected := []string{
-			"the",      //21
-			"of",       //12
-			"to",       //9
-			"a",        //7
-			"and",      //7
-			"was",      //7
-			"by",       //6
-			"nuclear",  //6
-			"Zanzibar", //5
-			"Gear",     //3
+			"the",      // 21
+			"of",       // 12
+			"to",       // 9
+			"a",        // 7
+			"and",      // 7
+			"was",      // 7
+			"by",       // 6
+			"nuclear",  // 6
+			"Zanzibar", // 5
+			"Gear",     // 3
 		}
 		require.Equal(t, expected, Top10(textEnglish))
 	})
