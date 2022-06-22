@@ -75,8 +75,8 @@ func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
-	t.Run("positive test", func(t *testing.T) {
 
+	t.Run("positive test", func(t *testing.T) {
 		expected := []string{
 			"the",      //21
 			"of",       //12
