@@ -43,9 +43,54 @@ var text = `Как видите, он  спускается  по  лестни�
 	посидеть у огня и послушать какую-нибудь интересную сказку.
 		В этот вечер...`
 
+var textEnglish = `By 1999, the Cold War had thawed, and it seemed 
+	nuclear proliferation would soon be a thing of the past. Despite 
+	this, all was not well in the world. A series of shocks to the oil 
+	market spurred the development of new high-tech energy sources,
+	including fusion power. However, most vehicles still relied on oil. 
+	Oil reserves were at a critical low, and the world community was 
+	prepared to take drastic measures, either by drilling into sand and 
+	shale for more oil, despite the difficulty—or moving on to renewable 
+	fuels.
+	Such steps proved unnecessary when Czech scientist, Dr. Kio Marv, 
+	successfully bio-engineered a new species of algae, 
+	OILIX, that could produce petroleum-grade hydrocarbons with little 
+	expense and effort. Marv was on his way to a demonstration in the United 
+	States when he was kidnapped by soldiers from Zanzibar Land. NATO 
+	discovered that Zanzibar Land's leaders planned to hold the world hostage 
+	by controlling the supply of oil, and some good old-fashioned nuclear 
+	brinkmanship, courtesy of a stockpile of nukes.
+	Solid Snake was brought out of retirement by FOXHOUND's new commander, 
+	Roy Campbell, and was sent to Zanzibar Land to rescue Dr. Marv.
+	For a full summary, see Zanzibar Land Disturbance.
+	The intro to the game and the instruction manual mention that nuclear 
+	weapons had been completely abandoned by the time of the main plot, 
+	making Zanzibar Land the world's sole nuclear power. Metal Gear Solid, 
+	however, retcons this account by having the current nuclear-armed nations 
+	maintain their stockpiles, with the reduction of nuclear weapons via the 
+	START-3 Treaty serving a prominent role in the story. Any references 
+	to global nuclear disarmament during the time of Metal Gear 2 
+	was omitted from the Previous Operations section of Metal Gear Solid.`
+
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
+	})
+
+	t.Run("positive test", func(t *testing.T) {
+		expected := []string{
+			"the",      // 21
+			"of",       // 12
+			"to",       // 9
+			"a",        // 7
+			"and",      // 7
+			"was",      // 7
+			"by",       // 6
+			"nuclear",  // 6
+			"Zanzibar", // 5
+			"Gear",     // 3
+		}
+		require.Equal(t, expected, Top10(textEnglish))
 	})
 
 	t.Run("positive test", func(t *testing.T) {
