@@ -45,6 +45,8 @@ func (cache *lruCache) Get(key Key) (interface{}, bool) {
 	defer cache.Unlock()
 
 	if item, ok := cache.items[key]; ok {
+		cache.queue.PushFront(item.Value)
+
 		return item.Value, true
 	}
 
