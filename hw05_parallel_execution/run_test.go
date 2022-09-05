@@ -137,25 +137,4 @@ func TestRun(t *testing.T) {
 		require.ErrorIs(t, err, ErrNoWorkers, "should return no-workers error if no workers found")
 		require.Equal(t, int64(0), doneTasks, "tasks shouldn't be done without workers")
 	})
-
-	t.Run("Run with max 0 errors arg", func(t *testing.T) {
-		tasks := []Task{}
-		workersCount := 5
-		maxErrorsCount := 0
-		maxTasks := 30
-		var doneTasks int64
-
-		for i := 0; i < maxTasks; i++ {
-			tasks = append(tasks, func() error {
-				atomic.AddInt64(&doneTasks, 1)
-
-				return nil
-			})
-		}
-
-		err := Run(tasks, workersCount, maxErrorsCount)
-
-		require.ErrorIs(t, err, ErrMaxErrorsIsNotValid, "should return is-not-valid-number error if max-errors number is too small")
-		require.Equal(t, int64(0), doneTasks, "tasks shouldn't be done without workers")
-	})
 }
