@@ -15,15 +15,15 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	ex := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
 	envStrings := []string{}
 
-	for key, value := range env {
-		if value.NeedRemove {
-			os.Unsetenv(key)
+	for k, v := range env {
+		if v.NeedRemove {
+			os.Unsetenv(k)
 
 			continue
 		}
 
 		envStrings = append(envStrings,
-			key+"="+value.Value,
+			k+"="+v.Value,
 		)
 	}
 

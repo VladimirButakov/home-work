@@ -16,7 +16,7 @@ func TestRunCmd(t *testing.T) {
 		require.Equal(t, 1, code, "should return 1 code")
 	})
 
-	t.Run("test echo line return", func(t *testing.T) {
+	t.Run("test echoline return", func(t *testing.T) {
 		if runtime.GOOS == "windows" {
 			t.Skip()
 		}

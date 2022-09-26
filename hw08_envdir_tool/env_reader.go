@@ -18,14 +18,14 @@ type EnvValue struct {
 }
 
 func ReadFile(path string) (env EnvValue) {
-	file, err := os.Open(path)
+	f, err := os.Open(path)
 	if err != nil {
 		return EnvValue{"", true}
 	}
 
-	defer file.Close()
+	defer f.Close()
 
-	reader := bufio.NewReader(file)
+	reader := bufio.NewReader(f)
 
 	line, _, err := reader.ReadLine()
 	if err != nil {
