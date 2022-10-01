@@ -50,7 +50,7 @@ func (c *Client) Send() error {
 }
 
 func (c *Client) Receive() error {
-	if _, err := io.Copy(c.out, c.conn); err == nil {
+	if _, err := io.Copy(c.out, c.conn); err != nil {
 		return fmt.Errorf("error occurred while receiving: %w", err)
 	}
 	if _, err := fmt.Fprintln(os.Stderr, "...Connection was closed by peer"); err != nil {
