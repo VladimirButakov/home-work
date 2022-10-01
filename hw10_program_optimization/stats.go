@@ -3,12 +3,13 @@ package hw10programoptimization
 import (
 	"bufio"
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
 	"io"
 	"strings"
+
+	jsonIter "github.com/json-iterator/go"
 )
 
-var json = jsoniter.ConfigCompatibleWithStandardLibrary
+var json = jsonIter.ConfigCompatibleWithStandardLibrary
 
 type User struct {
 	ID       int
@@ -30,21 +31,18 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return countDomains(u, domain)
 }
 
-type users [100_000]User
+type users []User
 
 func getUsers(r io.Reader) (result users, err error) {
-
 	buf := bufio.NewScanner(r)
 	buf.Split(bufio.ScanLines)
 
-	i := 0
 	for buf.Scan() {
 		var user User
 		if err = json.Unmarshal(buf.Bytes(), &user); err != nil {
 			return
 		}
-		result[i] = user
-		i++
+		result = append(result, user)
 	}
 	return
 }
@@ -53,10 +51,10 @@ func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
 	for _, user := range u {
-		indx := strings.IndexAny(user.Email, "@") + 1
+		index := strings.IndexAny(user.Email, "@") + 1
 
 		if strings.HasSuffix(user.Email, "."+domain) {
-			str := strings.ToLower(user.Email[indx:])
+			str := strings.ToLower(user.Email[index:])
 
 			result[str]++
 		}
