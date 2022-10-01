@@ -33,6 +33,17 @@ func main() {
 		}
 	}()
 
+	go func() {
+		defer ctxCancelF()
+
+		err := client.Receive()
+		if err != nil {
+			if _, err := fmt.Fprintln(os.Stderr, err); err != nil {
+				return
+			}
+		}
+	}()
+
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
 
