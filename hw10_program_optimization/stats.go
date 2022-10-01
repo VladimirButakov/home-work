@@ -31,18 +31,20 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return countDomains(u, domain)
 }
 
-type users []User
+type users [100_000]User
 
 func getUsers(r io.Reader) (result users, err error) {
 	buf := bufio.NewScanner(r)
 	buf.Split(bufio.ScanLines)
 
+	i := 0
 	for buf.Scan() {
 		var user User
 		if err = json.Unmarshal(buf.Bytes(), &user); err != nil {
 			return
 		}
-		result = append(result, user)
+		result[i] = user
+		i++
 	}
 	return
 }
