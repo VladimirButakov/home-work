@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -13,40 +14,37 @@ import (
 var timeout time.Duration
 
 func main() {
-	host, port := os.Args[0], os.Args[1]
-	client := NewTelnetClient(net.JoinHostPort(host, port), timeout, os.Stdin, os.Stdout)
-
-	if err := client.Connect(); err != nil {
-		log.Fatal(err)
+	if flag.NArg() < 2 {
+		log.Fatal("not enough arguments")
 	}
 
-	defer func(client TelnetClient) {
-		if err := client.Close(); err != nil {
-			return
-		}
-	}(client)
+	host := flag.Arg(0)
+	port := flag.Arg(1)
+	address := net.JoinHostPort(host, port)
+
+	telnet := NewTelnetClient(address, timeout, os.Stdin, os.Stdout)
+
+	if err := telnet.Connect(); err != nil {
+		log.Fatal(err)
+	}
+	defer telnet.Close()
 
 	ctx, ctxCancelF := context.WithCancel(context.Background())
-
 	go func() {
 		defer ctxCancelF()
 
-		err := client.Send()
+		err := telnet.Send()
 		if err != nil {
-			if _, err := fmt.Fprintln(os.Stderr, err); err != nil {
-				return
-			}
+			fmt.Fprintln(os.Stderr, err)
 		}
 	}()
 
 	go func() {
 		defer ctxCancelF()
 
-		err := client.Receive()
+		err := telnet.Receive()
 		if err != nil {
-			if _, err := fmt.Fprintln(os.Stderr, err); err != nil {
-				return
-			}
+			fmt.Fprintln(os.Stderr, err)
 		}
 	}()
 
