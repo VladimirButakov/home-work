@@ -1,4 +1,4 @@
-module github.com/Fuchsoria/go_hw/hw08_envdir_tool
+module github.com/VladimirButakov/home-work/tree/master/hw08_envdir_tool
 
 go 1.16
 
