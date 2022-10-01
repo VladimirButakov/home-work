@@ -1,4 +1,4 @@
-module github.com/Fuchsoria/go_hw/hw07_file_copying
+module github.com/VladimirButakov/home-work/tree/master/hw07_file_copying
 
 go 1.16
 
