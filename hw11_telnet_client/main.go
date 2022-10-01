@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -14,6 +15,11 @@ var timeout time.Duration
 func main() {
 	host, port := os.Args[0], os.Args[1]
 	client := NewTelnetClient(net.JoinHostPort(host, port), timeout, os.Stdin, os.Stdout)
+
+	if err := client.Connect(); err != nil {
+		log.Fatal(err)
+	}
+
 	defer func(client TelnetClient) {
 		if err := client.Close(); err != nil {
 			return
