@@ -97,7 +97,7 @@ func checkIn(rv reflect.Value, ruleValue string) bool {
 	ins := strings.Split(ruleValue, ",")
 	isValid := false
 
-	switch rv.Kind() {
+	switch rv.Kind() { //nolint:exhaustive
 	case reflect.Int:
 		intValue := int(rv.Int())
 
@@ -177,7 +177,7 @@ func checkValue(valErrs ValidationErrors, fName string, validateTag string, rv r
 		newValErrs = valErrs
 	)
 
-	switch rv.Kind() {
+	switch rv.Kind() { //nolint:exhaustive
 	case reflect.String:
 		errs = validateValue(validateTag, rv)
 	case reflect.Int:
