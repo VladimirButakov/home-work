@@ -14,6 +14,8 @@ import (
 var timeout time.Duration
 
 func main() {
+	flag.DurationVar(&timeout, "timeout", 10*time.Second, "timeout")
+	flag.Parse()
 	host, port := flag.Arg(0), flag.Arg(1)
 
 	client := NewTelnetClient(net.JoinHostPort(host, port), timeout, os.Stdin, os.Stdout)
