@@ -25,14 +25,10 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
 
-	defer func(client TelnetClient) {
-		if err := client.Close(); err != nil {
-			return
-		}
-	}(client)
+	defer client.Close()
 
-	send(client, ctxCancelF)
-	receive(client, ctxCancelF)
+	go send(client, ctxCancelF)
+	go receive(client, ctxCancelF)
 
 	select {
 	case <-sigCh:
