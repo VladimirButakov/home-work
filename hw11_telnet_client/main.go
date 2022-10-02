@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -13,22 +14,23 @@ import (
 var timeout time.Duration
 
 func main() {
-	host, port := os.Args[0], os.Args[1]
+	host, port := flag.Arg(0), flag.Arg(1)
+
 	client := NewTelnetClient(net.JoinHostPort(host, port), timeout, os.Stdin, os.Stdout)
+
+	ctx, ctxCancelF := context.WithCancel(context.Background())
 
 	if err := client.Connect(); err != nil {
 		log.Fatal(err)
 	}
 
-	ctx, ctxCancelF := context.WithCancel(context.Background())
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt)
-
 	defer client.Close()
 
 	go send(client, ctxCancelF)
 	go receive(client, ctxCancelF)
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
 
 	select {
 	case <-sigCh:
@@ -38,21 +40,21 @@ func main() {
 }
 
 func send(client TelnetClient, ctxCancelF context.CancelFunc) {
+	defer ctxCancelF()
 	err := client.Send()
 	if err != nil {
 		if _, err := fmt.Fprintln(os.Stderr, err); err != nil {
 			return
 		}
 	}
-	ctxCancelF()
 }
 
 func receive(client TelnetClient, ctxCancelF context.CancelFunc) {
+	defer ctxCancelF()
 	err := client.Receive()
 	if err != nil {
 		if _, err := fmt.Fprintln(os.Stderr, err); err != nil {
 			return
 		}
 	}
-	ctxCancelF()
 }
