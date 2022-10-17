@@ -2,22 +2,27 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
+	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/app"
+	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
-var configFile string
+var (
+	configFile           string
+	ErrCantCreateStorage = errors.New("can not create storage")
+)
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar/config.json", "Path to configuration file")
 }
 
 func main() {
@@ -28,20 +33,34 @@ func main() {
 		return
 	}
 
-	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
+	ctx, cancel := context.WithCancel(context.Background())
 
-	storage := memorystorage.New()
+	config := NewConfig()
+
+	logg := logger.New(config.Logger.Level, config.Logger.File)
+
+	storage, err := createStorage(ctx, config)
+	if err != nil {
+		logg.Error(err.Error())
+	}
+
 	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
-
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	server := internalhttp.NewServer(calendar, config.HTTP.Host, config.HTTP.Port)
 	defer cancel()
 
 	go func() {
-		<-ctx.Done()
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, syscall.SIGINT, syscall.SIGHUP)
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-signals:
+		}
+
+		signal.Stop(signals)
+		cancel()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
@@ -58,4 +77,27 @@ func main() {
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}
+}
+
+func createStorage(ctx context.Context, config Config) (app.Storage, error) {
+	switch config.DB.Method {
+	case "in-memory":
+		storage := memorystorage.New()
+
+		return storage, nil
+	case "sql":
+		storage, err := sqlstorage.New(ctx, config.DB.ConnectionString)
+		if err != nil {
+			return nil, err
+		}
+
+		err = storage.Connect(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return storage, nil
+	}
+
+	return nil, ErrCantCreateStorage
 }
