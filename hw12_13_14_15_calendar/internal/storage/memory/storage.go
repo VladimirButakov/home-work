@@ -12,6 +12,9 @@ type Storage struct {
 }
 
 func (s *Storage) AddEvent(event storage.Event) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.store[event.ID] = event
 
 	return nil
@@ -19,20 +22,27 @@ func (s *Storage) AddEvent(event storage.Event) error {
 
 func (s *Storage) UpdateEvent(event storage.Event) error {
 	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.store[event.ID] = event
-	s.mu.Unlock()
 
 	return nil
 }
 
 func (s *Storage) RemoveEvent(eventID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	delete(s.store, eventID)
 
 	return nil
 }
 
 func (s *Storage) DailyEvents(date time.Time) ([]storage.Event, error) {
-	result := []storage.Event{}
+	var result []storage.Event
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	for _, event := range s.store {
 		eventDate := time.Unix(event.EventDate, 0)
@@ -46,7 +56,10 @@ func (s *Storage) DailyEvents(date time.Time) ([]storage.Event, error) {
 }
 
 func (s *Storage) WeeklyEvents(date time.Time) ([]storage.Event, error) {
-	result := []storage.Event{}
+	var result []storage.Event
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	for _, event := range s.store {
 		eventDate := time.Unix(event.EventDate, 0)
@@ -62,7 +75,10 @@ func (s *Storage) WeeklyEvents(date time.Time) ([]storage.Event, error) {
 }
 
 func (s *Storage) MonthEvents(date time.Time) ([]storage.Event, error) {
-	result := []storage.Event{}
+	var result []storage.Event
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	for _, event := range s.store {
 		eventDate := time.Unix(event.EventDate, 0)

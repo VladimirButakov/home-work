@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
 	"os"
 	"os/signal"
@@ -12,13 +13,13 @@ import (
 
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/app"
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/server/http"
+	gateway "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/server/grpc"
 	memorystorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var (
 	configFile           string
-	ErrCantCreateStorage = errors.New("can not create storage")
+	ErrCantCreateStorage = errors.New("cannot create storage")
 )
 
 func init() {
@@ -35,18 +36,27 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	config := NewConfig()
+	config, err := NewConfig()
+	if err != nil {
+		panic(err)
+	}
 
 	logg := logger.New(config.Logger.Level, config.Logger.File)
 
 	storage, err := createStorage(ctx, config)
 	if err != nil {
 		logg.Error(err.Error())
+
+		panic(err)
 	}
 
 	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(calendar, config.HTTP.Host, config.HTTP.Port)
+	server, err := gateway.NewServer(calendar, config.HTTP.Host, config.HTTP.Port, config.HTTP.GrpcPort)
+	if err != nil {
+		logg.Error(err.Error())
+	}
+
 	defer cancel()
 
 	go func() {
@@ -66,14 +76,14 @@ func main() {
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+			logg.Error("failed to stop grpc server: " + err.Error())
 		}
 	}()
 
 	logg.Info("calendar is running...")
 
 	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
+		logg.Error("failed to start grpc server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}
@@ -88,12 +98,12 @@ func createStorage(ctx context.Context, config Config) (app.Storage, error) {
 	case "sql":
 		storage, err := sqlstorage.New(ctx, config.DB.ConnectionString)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can't create new storage instance, %w", err)
 		}
 
 		err = storage.Connect(ctx)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can't connect to storage, %w", err)
 		}
 
 		return storage, nil
