@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/version"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,7 +31,7 @@ func main() {
 	flag.Parse()
 
 	if flag.Arg(0) == "version" {
-		printVersion()
+		version.PrintVersion()
 		return
 	}
 
