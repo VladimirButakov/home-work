@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	simpleconsumer "github.com/Fuchsoria/go_hw/hw12_13_14_15_calendar/internal/amqp/consumer"
-	simpleproducer "github.com/Fuchsoria/go_hw/hw12_13_14_15_calendar/internal/amqp/producer"
-	"github.com/Fuchsoria/go_hw/hw12_13_14_15_calendar/internal/logger"
-	sqlstorage "github.com/Fuchsoria/go_hw/hw12_13_14_15_calendar/internal/storage/sql"
+	simpleconsumer "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/amqp/consumer"
+	simpleproducer "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/amqp/producer"
+	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
+	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
 	"github.com/streadway/amqp"
 )
 
@@ -51,8 +51,8 @@ func (s *Scheduler) SendNotificationsToEvents(producer *simpleproducer.Producer)
 		message := simpleconsumer.AMQPMessage{
 			EventID:    event.ID,
 			EventTitle: event.Title,
-			EventDate:  event.Date,
-			User:       event.OwnerID,
+			EventDate:  event.EventDate,
+			User:       event.UserID,
 		}
 
 		err := producer.Publish(message)
