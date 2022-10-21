@@ -7,6 +7,7 @@ import (
 	"fmt"
 	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/version"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -39,7 +40,7 @@ func main() {
 
 	config, err := NewConfig()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	logg := logger.New(config.Logger.Level, config.Logger.File)
@@ -48,7 +49,7 @@ func main() {
 	if err != nil {
 		logg.Error(err.Error())
 
-		panic(err)
+		log.Fatal(err)
 	}
 
 	calendar := app.New(logg, storage)

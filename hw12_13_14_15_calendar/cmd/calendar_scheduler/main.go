@@ -4,13 +4,15 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/scheduler"
+	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
+	"log"
+	"os"
 	"os/signal"
 	"syscall"
 
-	simpleconsumer "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/amqp/consumer"
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
 	version "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/version"
-	"github.com/streadway/amqp"
 )
 
 var configFile string
@@ -27,33 +29,59 @@ func main() {
 		return
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer cancel()
-
 	config, err := NewConfig()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	logg := logger.New(config.Logger.Level, config.Logger.File)
 
-	conn, err := amqp.Dial(config.AMPQ.URI)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	storage, err := connectStorage(ctx, config)
 	if err != nil {
-		panic(err)
+		logg.Error(err.Error())
+
+		log.Fatal(err)
 	}
 
-	c := simpleconsumer.New(config.AMPQ.Name, conn, logg)
+	scheduler := scheduler.NewScheduler(logg, storage, config.Scheduler.RecheckDelaySeconds, config.AMPQ.URI, config.AMPQ.Name)
 
-	msgs, err := c.Consume(ctx, config.AMPQ.Name)
+	go func() {
+		signals := make(chan os.Signal, 1)
+		signal.Notify(signals, syscall.SIGINT, syscall.SIGHUP)
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-signals:
+		}
+
+		signal.Stop(signals)
+		cancel()
+	}()
+
+	logg.Info("scheduler is running...")
+
+	if err := scheduler.Start(ctx); err != nil {
+		logg.Error(err.Error())
+
+		log.Fatal(err)
+	}
+
+	cancel()
+}
+
+func connectStorage(ctx context.Context, config Config) (*sqlstorage.Storage, error) {
+	storage, err := sqlstorage.New(ctx, config.DB.ConnectionString)
 	if err != nil {
-		logg.Error(fmt.Errorf("cannot consume messages, %w", err).Error())
+		return nil, fmt.Errorf("can't create new storage instance, %w", err)
 	}
 
-	logg.Info("start consuming...")
-
-	for m := range msgs {
-		fmt.Println("receive new message: ", string(m.Data))
+	err = storage.Connect(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("can't connect to storage, %w", err)
 	}
 
-	logg.Info("stopped consuming")
+	return storage, nil
 }
