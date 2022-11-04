@@ -4,15 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	simpleconsumer "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/amqp/consumer"
-	"github.com/streadway/amqp"
 	"log"
 	"os/signal"
 	"syscall"
 
+	simpleconsumer "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/amqp/consumer"
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/version"
-	_ "github.com/lib/pq"
+	"github.com/streadway/amqp"
 )
 
 var configFile string

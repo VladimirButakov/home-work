@@ -4,23 +4,22 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/scheduler"
-	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
+	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/scheduler"
+	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
 	version "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/version"
 	_ "github.com/lib/pq"
-	"github.com/streadway/amqp"
 )
 
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar_sender/config.json", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar_scheduler/config.json", "Path to configuration file")
 }
 
 func main() {
@@ -47,7 +46,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	scheduler := scheduler.NewScheduler(logg, storage, config.Scheduler.RecheckDelaySeconds, config.AMPQ.URI, config.AMPQ.Name)
+	scheduler := scheduler.NewScheduler(
+		logg,
+		storage,
+		config.Scheduler.RecheckDelaySeconds,
+		config.AMPQ.URI,
+		config.AMPQ.Name)
 
 	go func() {
 		signals := make(chan os.Signal, 1)
