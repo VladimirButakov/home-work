@@ -13,6 +13,8 @@ import (
 
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
 	version "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/version"
+	_ "github.com/lib/pq"
+	"github.com/streadway/amqp"
 )
 
 var configFile string

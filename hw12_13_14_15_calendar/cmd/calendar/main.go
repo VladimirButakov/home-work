@@ -17,6 +17,7 @@ import (
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
 	gateway "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/server/grpc"
 	memorystorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/memory"
+	_ "github.com/lib/pq"
 )
 
 var (
