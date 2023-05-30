@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	sqlstorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/version"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,6 +16,7 @@ import (
 	"github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/logger"
 	gateway "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/server/grpc"
 	memorystorage "github.com/VladimirButakov/home-work/tree/master/hw12_13_14_15_calendar/internal/storage/memory"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -30,7 +32,7 @@ func main() {
 	flag.Parse()
 
 	if flag.Arg(0) == "version" {
-		printVersion()
+		version.PrintVersion()
 		return
 	}
 
